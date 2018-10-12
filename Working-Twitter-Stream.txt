@@ -1,0 +1,26 @@
+spark-shell --jars /home/skhan/contents/SparkScala/dstream-twitter_2.11-2.3.0-SNAPSHOT.jar,/home/skhan/contents/SparkScala/twitter4j-core-4.0.4.jar,/home/skhan/contents/SparkScala/twitter4j-stream-4.0.4.jar
+
+
+import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.dstream.ReceiverInputDStream
+
+import org.apache.spark._
+import org.apache.spark.SparkContext._
+import org.apache.spark.streaming._
+import org.apache.spark.streaming.twitter._
+import org.apache.spark.streaming.StreamingContext._
+
+
+val streamingCtxt = new StreamingContext(sc, Seconds(10))
+
+System.setProperty("twitter4j.oauth.consumerKey", "okj4bWgYPuxQUxUrEedXkhfZW")
+System.setProperty("twitter4j.oauth.consumerSecret", "vyNebKVJrZI0rW60xChcOaLM7bInhOUeKPVSbNBcsPaf8WPo2v")
+System.setProperty("twitter4j.oauth.accessToken", "1049345952581148672-uFJzU48DxMiobHVZwwgMqmQNvKxdMJ")
+System.setProperty("twitter4j.oauth.accessTokenSecret", "krVy6vl77tY94m5qMlQr0XwaT00qfmVxNDw8d19DSEJNp")
+
+val inputDStream: ReceiverInputDStream[twitter4j.Status] = TwitterUtils.createStream(streamingCtxt, None, Array("cnnbrk")) //cnnbrk, ChinaDaily
+inputDStream.foreachRDD((rdd: RDD[twitter4j.Status]) => rdd.foreach(s => println(s.getText)))
+
+streamingCtxt.checkpoint("/tmp/checkpoint")
+streamingCtxt.start()
+
